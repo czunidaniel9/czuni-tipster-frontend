@@ -33,6 +33,13 @@ export function TipCard({ tip }: { tip: TipOut }) {
     f.home_team.canonical_name,
     f.away_team.canonical_name
   );
+  const hasScore = f.home_score_90 != null && f.away_score_90 != null;
+  const totalGoals =
+    f.total_goals ??
+    (hasScore ? (f.home_score_90 ?? 0) + (f.away_score_90 ?? 0) : null);
+  const landed = f.is_2_to_4_result === true;
+  // Defensive: the main market is always 2–4 goals, but guard legacy rows.
+  const isMainMarket = tip.market === "goals_2_to_4";
 
   return (
     <div className="surface flex flex-col overflow-hidden">
@@ -68,13 +75,45 @@ export function TipCard({ tip }: { tip: TipOut }) {
               <Target className="size-3.5" />
               Main tip
             </div>
-            <div className="mt-1 text-lg font-bold">2–4 Total Goals</div>
+            <div className="mt-1 text-lg font-bold">
+              {isMainMarket ? "2–4 Total Goals" : "Match outcome"}
+            </div>
             <div className="mt-0.5 text-xs text-muted-foreground">
               Regular-time total match goals
             </div>
           </div>
           <ConfidenceRing value={tip.confidence} size={84} strokeWidth={7} />
         </div>
+
+        {/* Final result strip for settled / finished matches */}
+        {hasScore && (
+          <div className="mt-3 flex items-center justify-between border-t border-success/30 pt-3 text-sm">
+            <span className="text-muted-foreground">
+              Full time:{" "}
+              <span className="font-semibold text-foreground tabular-nums">
+                {f.home_score_90}–{f.away_score_90}
+              </span>
+              <span className="ml-2 tabular-nums">{totalGoals} goals</span>
+            </span>
+            <span
+              className={
+                landed
+                  ? "inline-flex items-center gap-1 font-medium text-success"
+                  : "inline-flex items-center gap-1 font-medium text-destructive"
+              }
+            >
+              {landed ? (
+                <>
+                  <CheckCircle2 className="size-4" /> In 2–4 range
+                </>
+              ) : (
+                <>
+                  <CircleSlash className="size-4" /> Outside 2–4
+                </>
+              )}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* SECONDARY MARKET — 1X2, separate */}
