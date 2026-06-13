@@ -1,13 +1,29 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
-import { SideNav, TopBar } from "@/components/nav";
+import { ThemeProvider } from "@/components/theme-provider";
+import { AppShell } from "@/components/app-shell";
 
 export const metadata: Metadata = {
-  title: "Football Tipster",
+  title: "Tipster — AI Football Analytics",
   description:
-    "Daily football tips backed by Poisson models — at most 2 high-confidence picks per day.",
+    "A multi-layer football prediction platform: Poisson / Dixon–Coles, COCO Y0, and news & social intelligence — focused on the 2–4 total goals market.",
 };
+
+// Runs before hydration to set the theme class and avoid a flash of the wrong
+// theme. Mirrors the logic in ThemeProvider.
+const noFlashScript = `
+(function() {
+  try {
+    var t = localStorage.getItem('tipster-theme');
+    if (!t) {
+      t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    document.documentElement.classList.toggle('dark', t === 'dark');
+    document.documentElement.style.colorScheme = t;
+  } catch (e) {}
+})();
+`;
 
 export default function RootLayout({
   children,
@@ -15,21 +31,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
+      </head>
       <body className="min-h-screen bg-background text-foreground antialiased">
-        <Providers>
-          <div className="flex min-h-screen">
-            <SideNav />
-            <div className="flex min-h-screen flex-1 flex-col">
-              <TopBar />
-              <main className="flex-1">
-                <div className="mx-auto w-full max-w-6xl px-6 py-8">
-                  {children}
-                </div>
-              </main>
-            </div>
-          </div>
-        </Providers>
+        <ThemeProvider>
+          <Providers>
+            <AppShell>{children}</AppShell>
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );

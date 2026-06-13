@@ -4,80 +4,128 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* ---- Light theme: clean, premium analytics ---- */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 222 47% 11%;
 
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --primary: 222 47% 11%;
+    --primary-foreground: 210 40% 98%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --accent: 210 40% 94%;
+    --accent-foreground: 222 47% 11%;
 
-    --success: 142 70% 45%;
-    --success-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 240 5.9% 10%;
+    --success: 142 71% 38%;
+    --success-foreground: 0 0% 100%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
+    --warning: 35 92% 48%;
+    --warning-foreground: 30 50% 12%;
 
-    --radius: 0.5rem;
+    /* Brand: the AI / analytics accent. */
+    --brand: 245 75% 58%;
+    --brand-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 245 75% 58%;
+
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* ---- Dark theme: deep slate, premium ---- */
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
 
-    --card: 240 6% 8%;
-    --card-foreground: 0 0% 98%;
+    --card: 222 40% 9%;
+    --card-foreground: 210 40% 98%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
+    --popover: 222 44% 8%;
+    --popover-foreground: 210 40% 98%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222 47% 11%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --secondary: 217 33% 16%;
+    --secondary-foreground: 210 40% 98%;
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --muted: 217 33% 15%;
+    --muted-foreground: 215 20% 65%;
 
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 0 0% 98%;
+    --accent: 217 33% 18%;
+    --accent-foreground: 210 40% 98%;
 
-    --success: 142 70% 45%;
-    --success-foreground: 0 0% 98%;
+    --destructive: 0 63% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --warning: 38 92% 55%;
-    --warning-foreground: 240 5.9% 10%;
+    --success: 142 64% 45%;
+    --success-foreground: 144 80% 6%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --warning: 35 92% 58%;
+    --warning-foreground: 30 50% 10%;
+
+    --brand: 245 80% 68%;
+    --brand-foreground: 222 47% 11%;
+
+    --border: 217 33% 18%;
+    --input: 217 33% 20%;
+    --ring: 245 80% 68%;
   }
 }
 
 @layer base {
-  * { @apply border-border; }
+  * {
+    @apply border-border;
+  }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-  /* Number-heavy UI: tabular figures so digits align in columns */
-  .tabular-nums { font-variant-numeric: tabular-nums; }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* Subtle premium surface used by cards / panels. */
+  .surface {
+    @apply rounded-xl border bg-card shadow-sm;
+  }
+
+  /* The signature gradient used on brand elements / hero. */
+  .brand-gradient {
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--brand)) 0%,
+      hsl(245 75% 48%) 100%
+    );
+  }
+
+  .text-brand {
+    color: hsl(var(--brand));
+  }
+
+  /* The green success wash for fixtures that landed in the 2–4 band. */
+  .result-2to4 {
+    background-image: linear-gradient(
+      90deg,
+      hsl(var(--success) / 0.14) 0%,
+      hsl(var(--success) / 0.04) 100%
+    );
+    border-color: hsl(var(--success) / 0.5);
+  }
 }

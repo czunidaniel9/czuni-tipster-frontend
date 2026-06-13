@@ -2,12 +2,16 @@ import {
   CalibrationOutSchema,
   DailyTipsOutSchema,
   FixtureOutSchema,
+  GroupedTeamsOutSchema,
+  NewsSignalOutSchema,
   StatsSummarySchema,
   TeamDetailSchema,
   TeamWithFeaturesOutSchema,
   type CalibrationOut,
   type DailyTipsOut,
   type FixtureOut,
+  type GroupedTeamsOut,
+  type NewsSignalOut,
   type StatsSummary,
   type TeamDetail,
   type TeamWithFeaturesOut,
@@ -109,6 +113,22 @@ export function getTeamWithFeatures(
   return request(
     `/api/v1/teams/${id}/features${qs ? `?${qs}` : ""}`,
     TeamWithFeaturesOutSchema
+  );
+}
+
+export function getTeamsGrouped(): Promise<GroupedTeamsOut> {
+  return request("/api/v1/teams/grouped", GroupedTeamsOutSchema);
+}
+
+// ---------- Intelligence ----------
+
+export function getNewsSignals(teamId?: number): Promise<NewsSignalOut[]> {
+  const q = new URLSearchParams();
+  if (teamId) q.set("team_id", String(teamId));
+  const qs = q.toString();
+  return request(
+    `/api/v1/intelligence/signals${qs ? `?${qs}` : ""}`,
+    z.array(NewsSignalOutSchema)
   );
 }
 

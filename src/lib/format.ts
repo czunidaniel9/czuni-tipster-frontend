@@ -55,3 +55,49 @@ export function confidenceTone(p: number): "high" | "medium" | "low" {
   if (p >= 0.65) return "medium";
   return "low";
 }
+
+const SECONDARY_LABELS: Record<string, string> = {
+  home: "Home win",
+  draw: "Draw",
+  away: "Away win",
+};
+
+export function secondaryLabel(
+  sel: string | null | undefined,
+  homeName: string,
+  awayName: string
+): string {
+  if (!sel) return "—";
+  if (sel === "home") return `${homeName} win`;
+  if (sel === "away") return `${awayName} win`;
+  return SECONDARY_LABELS[sel] ?? sel;
+}
+
+export function cocoSupportLabel(level: string | null | undefined): string {
+  if (!level) return "—";
+  return level.charAt(0).toUpperCase() + level.slice(1);
+}
+
+export function riskLabel(level: string | null | undefined): string {
+  if (!level) return "Unknown";
+  return level.charAt(0).toUpperCase() + level.slice(1);
+}
+
+/** Tone for a risk level — higher risk is "worse" (warning/destructive). */
+export function riskTone(
+  level: string | null | undefined
+): "low" | "medium" | "high" {
+  if (level === "high") return "high";
+  if (level === "medium") return "medium";
+  return "low";
+}
+
+/** Tone for a COCO direction relative to the 2–4 prediction. */
+export function cocoTone(
+  dir: string | null | undefined
+): "good" | "neutral" | "bad" {
+  if (dir === "supports") return "good";
+  if (dir === "against") return "bad";
+  return "neutral";
+}
+
