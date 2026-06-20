@@ -101,21 +101,14 @@ export default function TipsPage() {
     queryFn: getTodaysTips,
   });
 
+  const recommended = data?.tips.filter((t) => t.publishable) ?? [];
+  const analysed = data?.tips.filter((t) => !t.publishable) ?? [];
+
   return (
     <div className="space-y-8">
       <DashboardHeader />
 
-      <div>
-        <div className="mb-4 flex items-end justify-between">
-          <div>
-            <h2 className="text-xl font-bold tracking-tight">Today&apos;s Tips</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Up to 2 high-confidence picks, generated daily at 07:00 UTC. Silence
-              means no opportunity cleared every layer.
-            </p>
-          </div>
-        </div>
-
+      <div className="space-y-8">
         {isLoading && (
           <div className="grid gap-6 lg:grid-cols-2">
             <Skeleton className="h-[28rem] w-full rounded-xl" />
@@ -139,16 +132,46 @@ export default function TipsPage() {
           <EmptyState
             icon={Target}
             title="No tips today"
-            description="No upcoming fixture cleared the confidence threshold across the Poisson/Dixon–Coles, COCO Y0 and news layers. This is intentional — the system stays silent when the data doesn't strongly support a pick."
+            description="No fixture cleared the confidence threshold across the Poisson/Dixon–Coles, COCO Y0 and news layers. The system stays silent when the data doesn't strongly support a pick."
           />
         )}
 
-        {data && data.tips.length > 0 && (
-          <div className="grid items-start gap-6 lg:grid-cols-2">
-            {data.tips.map((tip) => (
-              <TipCard key={tip.id} tip={tip} />
-            ))}
-          </div>
+        {data && recommended.length > 0 && (
+          <section>
+            <div className="mb-4">
+              <h2 className="text-xl font-bold tracking-tight">
+                Recommended Tips
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Up to 3 highlighted picks per day — the only ones counted in the
+                statistics. Generated daily at 07:00 UTC.
+              </p>
+            </div>
+            <div className="grid items-start gap-6 lg:grid-cols-2">
+              {recommended.map((tip) => (
+                <TipCard key={tip.id} tip={tip} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {data && analysed.length > 0 && (
+          <section>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold tracking-tight text-muted-foreground">
+                Other Analysed Matches
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Matches the engine analysed but did not recommend. Shown for
+                context — not counted in the statistics.
+              </p>
+            </div>
+            <div className="grid items-start gap-6 lg:grid-cols-2">
+              {analysed.map((tip) => (
+                <TipCard key={tip.id} tip={tip} />
+              ))}
+            </div>
+          </section>
         )}
       </div>
     </div>

@@ -1,6 +1,7 @@
 import {
   CheckCircle2,
   CircleSlash,
+  Sparkles,
   Target,
   TrendingUp,
 } from "lucide-react";
@@ -40,14 +41,42 @@ export function TipCard({ tip }: { tip: TipOut }) {
   const landed = f.is_2_to_4_result === true;
   // Defensive: the main market is always 2–4 goals, but guard legacy rows.
   const isMainMarket = tip.market === "goals_2_to_4";
+  const recommended = tip.publishable === true;
 
   return (
-    <div className="surface flex flex-col overflow-hidden">
+    <div
+      className={cn(
+        "surface flex flex-col overflow-hidden",
+        recommended
+          ? "ring-1 ring-success/40"
+          : "opacity-[0.92]"
+      )}
+    >
+      {/* Recommended / Analysed banner */}
+      <div
+        className={cn(
+          "flex items-center gap-1.5 px-5 py-1.5 text-[11px] font-semibold uppercase tracking-wider",
+          recommended
+            ? "bg-success/10 text-success"
+            : "bg-muted text-muted-foreground"
+        )}
+      >
+        {recommended ? (
+          <>
+            <Sparkles className="size-3.5" /> Recommended tip
+          </>
+        ) : (
+          <>Analysed match</>
+        )}
+      </div>
+
       {/* Header */}
-      <div className="flex flex-wrap items-center gap-2 px-5 pt-5">
-        <Badge variant="secondary" className="tabular-nums">
-          #{tip.rank}
-        </Badge>
+      <div className="flex flex-wrap items-center gap-2 px-5 pt-4">
+        {recommended && (
+          <Badge variant="secondary" className="tabular-nums">
+            #{tip.rank}
+          </Badge>
+        )}
         <Badge variant="outline">{f.competition.name}</Badge>
         <Badge variant={status.variant}>{status.label}</Badge>
         <span className="ml-auto text-xs text-muted-foreground tabular-nums">
@@ -67,13 +96,23 @@ export function TipCard({ tip }: { tip: TipOut }) {
         </div>
       </div>
 
-      {/* MAIN MARKET — 2–4 total goals, highlighted */}
-      <div className="mx-5 rounded-xl border border-success/40 bg-success/5 p-4">
+      {/* MAIN MARKET — 2–4 total goals (highlighted only when recommended) */}
+      <div
+        className={cn(
+          "mx-5 rounded-xl border p-4",
+          recommended ? "border-success/40 bg-success/5" : "border-border bg-muted/40"
+        )}
+      >
         <div className="flex items-center gap-4">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-success">
+            <div
+              className={cn(
+                "flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider",
+                recommended ? "text-success" : "text-muted-foreground"
+              )}
+            >
               <Target className="size-3.5" />
-              Main tip
+              {recommended ? "Main tip" : "Main market"}
             </div>
             <div className="mt-1 text-lg font-bold">
               {isMainMarket ? "2–4 Total Goals" : "Match outcome"}
