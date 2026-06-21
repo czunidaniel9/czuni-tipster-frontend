@@ -20,7 +20,7 @@ export function FixtureRow({ fixture }: { fixture: FixtureOut }) {
   return (
     <div
       className={cn(
-        "flex items-center gap-4 rounded-lg border bg-card px-4 py-3 transition-colors",
+        "flex items-center gap-4 rounded-xl border bg-card px-4 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-md",
         landed && "result-2to4"
       )}
     >

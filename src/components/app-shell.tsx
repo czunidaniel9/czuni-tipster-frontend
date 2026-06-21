@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Brand, NavLinks } from "@/components/nav";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -9,9 +10,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="relative flex min-h-screen">
+      {/* Animated aurora backdrop */}
+      <div className="aurora" aria-hidden />
+
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r bg-card/40 md:flex">
+      <motion.aside
+        initial={{ x: -24, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r bg-card/40 backdrop-blur-xl md:flex"
+      >
         <div className="flex h-16 items-center border-b px-5">
           <Brand />
         </div>
@@ -19,7 +28,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <NavLinks />
         </nav>
         <div className="space-y-3 border-t p-4">
-          <div className="rounded-lg border bg-background/50 p-3">
+          <div className="glass p-3">
             <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
               Main market
             </div>
@@ -31,25 +40,28 @@ export function AppShell({ children }: { children: ReactNode }) {
             v2 · multi-layer engine
           </div>
         </div>
-      </aside>
+      </motion.aside>
 
       {/* Main column */}
       <div className="flex min-h-screen flex-1 flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/70 px-4 backdrop-blur-xl md:px-8">
           <div className="flex items-center gap-3 md:hidden">
             <button
               type="button"
               aria-label="Open menu"
               onClick={() => setMobileOpen(true)}
-              className="inline-flex size-9 items-center justify-center rounded-lg border bg-card text-muted-foreground hover:text-foreground"
+              className="inline-flex size-9 items-center justify-center rounded-lg border bg-card text-muted-foreground transition-colors hover:text-foreground"
             >
               <Menu className="size-4" />
             </button>
             <Brand compact />
           </div>
           <div className="hidden items-center gap-2 md:flex">
-            <span className="inline-flex size-2 rounded-full bg-success" />
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-60" />
+              <span className="relative inline-flex size-2 rounded-full bg-success" />
+            </span>
             <span className="text-sm text-muted-foreground">System live</span>
           </div>
           <div className="flex items-center gap-2">
@@ -65,30 +77,41 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       {/* Mobile drawer */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setMobileOpen(false)}
-          />
-          <div className="absolute left-0 top-0 flex h-full w-72 flex-col border-r bg-card">
-            <div className="flex h-16 items-center justify-between border-b px-5">
-              <Brand />
-              <button
-                type="button"
-                aria-label="Close menu"
-                onClick={() => setMobileOpen(false)}
-                className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-            <nav className="flex-1 space-y-1 p-3">
-              <NavLinks onNavigate={() => setMobileOpen(false)} />
-            </nav>
+      <AnimatePresence>
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", stiffness: 320, damping: 32 }}
+              className="absolute left-0 top-0 flex h-full w-72 flex-col border-r bg-card"
+            >
+              <div className="flex h-16 items-center justify-between border-b px-5">
+                <Brand />
+                <button
+                  type="button"
+                  aria-label="Close menu"
+                  onClick={() => setMobileOpen(false)}
+                  className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+              <nav className="flex-1 space-y-1 p-3">
+                <NavLinks onNavigate={() => setMobileOpen(false)} />
+              </nav>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }

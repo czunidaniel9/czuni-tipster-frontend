@@ -8,6 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ConfidenceRing } from "@/components/confidence-ring";
 import { ModelLayers } from "@/components/model-layers";
+import { HoverLift } from "@/components/motion";
 import { cn } from "@/lib/utils";
 import {
   formatKickoff,
@@ -44,12 +45,12 @@ export function TipCard({ tip }: { tip: TipOut }) {
   const recommended = tip.publishable === true;
 
   return (
-    <div
+    <HoverLift
       className={cn(
-        "surface flex flex-col overflow-hidden",
+        "surface flex flex-col overflow-hidden transition-all duration-300",
         recommended
-          ? "ring-1 ring-success/40"
-          : "opacity-[0.92]"
+          ? "ring-1 ring-success/40 shadow-[0_8px_40px_-16px_hsl(152_60%_45%/0.5)]"
+          : "opacity-90 hover:opacity-100"
       )}
     >
       {/* Recommended / Analysed banner */}
@@ -254,6 +255,6 @@ export function TipCard({ tip }: { tip: TipOut }) {
           Layers: {tip.sources_used.join(" · ")}
         </div>
       )}
-    </div>
+    </HoverLift>
   );
 }

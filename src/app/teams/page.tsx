@@ -7,6 +7,7 @@ import { Search, Trophy, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
+import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 import { getTeamsGrouped } from "@/lib/api";
 
 export default function TeamsPage() {
@@ -89,8 +90,8 @@ export default function TeamsPage() {
       )}
 
       <div className="space-y-8">
-        {groups.map((g) => (
-          <section key={g.competition_code} className="space-y-3">
+        {groups.map((g, gi) => (
+          <Reveal key={g.competition_code} delay={gi * 0.04} className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="brand-gradient flex size-7 items-center justify-center rounded-md">
                 <Trophy className="size-3.5 text-white" />
@@ -105,25 +106,26 @@ export default function TeamsPage() {
                 {g.teams.length}
               </span>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Stagger className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {g.teams.map((t) => (
-                <Link
-                  key={`${g.competition_code}-${t.id}`}
-                  href={`/teams/${t.id}`}
-                  className="group surface p-4 transition-colors hover:bg-accent"
-                >
-                  <div className="font-medium group-hover:underline">
-                    {t.canonical_name}
-                  </div>
-                  {t.country && (
-                    <div className="mt-0.5 text-sm text-muted-foreground">
-                      {t.country}
+                <StaggerItem key={`${g.competition_code}-${t.id}`}>
+                  <Link
+                    href={`/teams/${t.id}`}
+                    className="group surface flex h-full flex-col p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/30 hover:bg-accent hover:shadow-md"
+                  >
+                    <div className="font-medium transition-colors group-hover:text-brand">
+                      {t.canonical_name}
                     </div>
-                  )}
-                </Link>
+                    {t.country && (
+                      <div className="mt-0.5 text-sm text-muted-foreground">
+                        {t.country}
+                      </div>
+                    )}
+                  </Link>
+                </StaggerItem>
               ))}
-            </div>
-          </section>
+            </Stagger>
+          </Reveal>
         ))}
       </div>
     </div>

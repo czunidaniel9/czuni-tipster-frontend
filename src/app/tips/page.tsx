@@ -17,31 +17,40 @@ import { TipCard } from "@/components/tip-card";
 import { EmptyState } from "@/components/empty-state";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CountUp, Stagger, StaggerItem, motion } from "@/components/motion";
 import { getStatsSummary, getTipsForDate } from "@/lib/api";
-import { addDaysIso, dayDate, dayLabel, formatPct, todayIso } from "@/lib/format";
+import { addDaysIso, dayDate, dayLabel, todayIso } from "@/lib/format";
 
 function StatCard({
   icon,
   label,
   value,
+  suffix = "",
   sub,
+  ready,
 }: {
   icon: React.ReactNode;
   label: string;
-  value: string;
+  value: number;
+  suffix?: string;
   sub?: string;
+  ready: boolean;
 }) {
   return (
-    <div className="surface p-4">
+    <StaggerItem className="surface group p-4 transition-colors hover:bg-accent/40">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </span>
-        <span className="text-muted-foreground">{icon}</span>
+        <span className="text-muted-foreground transition-colors group-hover:text-brand">
+          {icon}
+        </span>
       </div>
-      <div className="mt-2 text-2xl font-bold tabular-nums">{value}</div>
+      <div className="mt-2 text-2xl font-bold tabular-nums">
+        {ready ? <CountUp value={value} suffix={suffix} /> : "—"}
+      </div>
       {sub && <div className="mt-0.5 text-xs text-muted-foreground">{sub}</div>}
-    </div>
+    </StaggerItem>
   );
 }
 
@@ -51,15 +60,32 @@ function DashboardHeader() {
     queryFn: getStatsSummary,
   });
 
+  const ready = !!stats;
+
   return (
     <div className="space-y-6">
-      <div className="surface brand-gradient relative overflow-hidden p-6 text-white md:p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="brand-gradient glow-brand relative overflow-hidden rounded-2xl p-6 text-white md:p-8"
+      >
+        {/* soft moving light */}
+        <div className="pointer-events-none absolute -left-10 -top-10 size-64 rounded-full bg-white/15 blur-3xl" />
         <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
-            <Activity className="size-3.5" />
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.5 }}
+            className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur"
+          >
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-white/70" />
+              <span className="relative inline-flex size-2 rounded-full bg-white" />
+            </span>
             Multi-layer prediction engine
-          </div>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight">
+          </motion.div>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
             Daily Tips Dashboard
           </h1>
           <p className="mt-2 text-sm text-white/80">
@@ -68,35 +94,41 @@ function DashboardHeader() {
             <span className="font-semibold">2–4 total goals</span>.
           </p>
         </div>
-        <Target className="absolute -right-6 -top-6 size-48 text-white/10" />
-      </div>
+        <Target className="animate-float absolute -right-6 -top-6 size-48 text-white/10" />
+      </motion.div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <Stagger className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
           icon={<Target className="size-4" />}
           label="Recommended tips"
-          value={stats ? String(stats.total) : "—"}
+          value={stats?.total ?? 0}
           sub="all-time"
+          ready={ready}
         />
         <StatCard
           icon={<CheckCircle2 className="size-4" />}
           label="Win rate"
-          value={stats ? formatPct(stats.win_rate, 0) : "—"}
+          value={stats ? Math.round(stats.win_rate * 100) : 0}
+          suffix="%"
           sub={stats ? `${stats.won}W · ${stats.lost}L` : undefined}
+          ready={ready}
         />
         <StatCard
           icon={<Gauge className="size-4" />}
           label="Avg confidence"
-          value={stats ? formatPct(stats.avg_confidence, 0) : "—"}
+          value={stats ? Math.round(stats.avg_confidence * 100) : 0}
+          suffix="%"
           sub="recommended only"
+          ready={ready}
         />
         <StatCard
           icon={<TrendingUp className="size-4" />}
           label="Pending"
-          value={stats ? String(stats.pending) : "—"}
+          value={stats?.pending ?? 0}
           sub="awaiting result"
+          ready={ready}
         />
-      </div>
+      </Stagger>
     </div>
   );
 }
@@ -201,11 +233,13 @@ export default function TipsPage() {
             </p>
 
             {recommended.length > 0 ? (
-              <div className="grid items-start gap-6 lg:grid-cols-2">
+              <Stagger className="grid items-start gap-6 lg:grid-cols-2">
                 {recommended.map((tip) => (
-                  <TipCard key={tip.id} tip={tip} />
+                  <StaggerItem key={tip.id}>
+                    <TipCard tip={tip} />
+                  </StaggerItem>
                 ))}
-              </div>
+              </Stagger>
             ) : (
               <div className="surface flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
                 <CheckCircle2 className="size-4 shrink-0" />
@@ -234,11 +268,13 @@ export default function TipsPage() {
             </p>
 
             {analysed.length > 0 ? (
-              <div className="grid items-start gap-6 lg:grid-cols-2">
+              <Stagger className="grid items-start gap-6 lg:grid-cols-2">
                 {analysed.map((tip) => (
-                  <TipCard key={tip.id} tip={tip} />
+                  <StaggerItem key={tip.id}>
+                    <TipCard tip={tip} />
+                  </StaggerItem>
                 ))}
-              </div>
+              </Stagger>
             ) : (
               <div className="surface px-4 py-3 text-sm text-muted-foreground">
                 No analysed matches stored for this day.

@@ -55,6 +55,7 @@ const config: Config = {
         brand: {
           DEFAULT: "hsl(var(--brand))",
           foreground: "hsl(var(--brand-foreground))",
+          2: "hsl(var(--brand-2))",
         },
       },
       borderRadius: {

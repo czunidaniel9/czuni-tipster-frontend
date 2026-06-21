@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   BarChart3,
   CalendarDays,
@@ -30,10 +31,14 @@ export const NAV: NavItem[] = [
 
 export function Brand({ compact = false }: { compact?: boolean }) {
   return (
-    <Link href="/tips" className="flex items-center gap-2.5">
-      <span className="brand-gradient flex size-8 items-center justify-center rounded-lg shadow-sm">
+    <Link href="/tips" className="group flex items-center gap-2.5">
+      <motion.span
+        whileHover={{ rotate: 12, scale: 1.06 }}
+        transition={{ type: "spring", stiffness: 300, damping: 15 }}
+        className="brand-gradient glow-brand flex size-9 items-center justify-center rounded-xl"
+      >
         <Radar className="size-4 text-white" />
-      </span>
+      </motion.span>
       {!compact && (
         <span className="flex flex-col leading-none">
           <span className="text-sm font-semibold tracking-tight">Tipster</span>
@@ -62,16 +67,25 @@ export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             href={item.href}
             onClick={onNavigate}
             className={cn(
-              "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
               active
-                ? "bg-accent text-foreground"
-                : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
+            {active && (
+              <motion.span
+                layoutId="nav-active"
+                transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                className="absolute inset-0 -z-10 rounded-xl border border-brand/20 bg-accent"
+              />
+            )}
             <Icon
               className={cn(
                 "size-4 transition-colors",
-                active ? "text-brand" : "text-muted-foreground group-hover:text-foreground"
+                active
+                  ? "text-brand"
+                  : "text-muted-foreground group-hover:text-foreground"
               )}
             />
             {item.label}

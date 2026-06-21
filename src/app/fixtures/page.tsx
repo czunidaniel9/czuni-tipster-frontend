@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { FixtureRow } from "@/components/fixture-row";
+import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 import { EmptyState } from "@/components/empty-state";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -124,20 +125,24 @@ export default function FixturesPage() {
 
       {grouped.length > 0 && (
         <div className="space-y-6">
-          {grouped.map((g) => (
-            <section key={g.code} className="space-y-2">
-              <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                {g.name}
-                <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
-                  {g.items.length}
-                </span>
-              </h2>
-              <div className="space-y-2">
-                {g.items.map((f) => (
-                  <FixtureRow key={f.id} fixture={f} />
-                ))}
-              </div>
-            </section>
+          {grouped.map((g, gi) => (
+            <Reveal key={g.code} delay={gi * 0.04}>
+              <section className="space-y-2">
+                <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  {g.name}
+                  <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
+                    {g.items.length}
+                  </span>
+                </h2>
+                <Stagger className="space-y-2">
+                  {g.items.map((f) => (
+                    <StaggerItem key={f.id}>
+                      <FixtureRow fixture={f} />
+                    </StaggerItem>
+                  ))}
+                </Stagger>
+              </section>
+            </Reveal>
           ))}
         </div>
       )}

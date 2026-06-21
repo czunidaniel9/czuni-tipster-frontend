@@ -29,61 +29,62 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 71% 38%;
+    --success: 152 62% 40%;
     --success-foreground: 0 0% 100%;
 
     --warning: 35 92% 48%;
     --warning-foreground: 30 50% 12%;
 
-    /* Brand: the AI / analytics accent. */
-    --brand: 245 75% 58%;
+    --brand: 250 84% 60%;
+    --brand-2: 280 80% 62%;
     --brand-foreground: 0 0% 100%;
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 245 75% 58%;
+    --ring: 250 84% 60%;
 
-    --radius: 0.75rem;
+    --radius: 0.85rem;
   }
 
   .dark {
-    /* ---- Dark theme: deep slate, premium ---- */
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
+    /* ---- Dark theme: deep space slate, premium ---- */
+    --background: 230 35% 6%;
+    --foreground: 213 31% 95%;
 
-    --card: 222 40% 9%;
-    --card-foreground: 210 40% 98%;
+    --card: 229 30% 9%;
+    --card-foreground: 213 31% 95%;
 
-    --popover: 222 44% 8%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 229 32% 8%;
+    --popover-foreground: 213 31% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 213 31% 95%;
+    --primary-foreground: 230 35% 8%;
 
-    --secondary: 217 33% 16%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 228 22% 16%;
+    --secondary-foreground: 213 31% 95%;
 
-    --muted: 217 33% 15%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 228 20% 15%;
+    --muted-foreground: 217 18% 62%;
 
-    --accent: 217 33% 18%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 228 24% 18%;
+    --accent-foreground: 213 31% 95%;
 
-    --destructive: 0 63% 50%;
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 64% 45%;
-    --success-foreground: 144 80% 6%;
+    --success: 152 60% 47%;
+    --success-foreground: 152 80% 7%;
 
-    --warning: 35 92% 58%;
+    --warning: 35 92% 60%;
     --warning-foreground: 30 50% 10%;
 
-    --brand: 245 80% 68%;
-    --brand-foreground: 222 47% 11%;
+    --brand: 252 90% 72%;
+    --brand-2: 286 85% 72%;
+    --brand-foreground: 230 35% 8%;
 
-    --border: 217 33% 18%;
-    --input: 217 33% 20%;
-    --ring: 245 80% 68%;
+    --border: 228 20% 18%;
+    --input: 228 20% 20%;
+    --ring: 252 90% 72%;
   }
 }
 
@@ -91,27 +92,59 @@
   * {
     @apply border-border;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    transition: background-color 0.4s ease, color 0.4s ease;
   }
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+  /* Nicer custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.25);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+    background-clip: content-box;
+  }
 }
 
 @layer components {
-  /* Subtle premium surface used by cards / panels. */
+  /* Premium card surface with subtle gradient + soft shadow. */
   .surface {
-    @apply rounded-xl border bg-card shadow-sm;
+    @apply rounded-2xl border bg-card shadow-sm;
+    background-image: linear-gradient(
+      180deg,
+      hsl(var(--card)) 0%,
+      hsl(var(--card) / 0.85) 100%
+    );
   }
 
-  /* The signature gradient used on brand elements / hero. */
+  /* Glassmorphism panel. */
+  .glass {
+    @apply rounded-2xl border;
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 8px 30px -12px hsl(230 50% 4% / 0.5);
+  }
+
   .brand-gradient {
     background-image: linear-gradient(
       135deg,
       hsl(var(--brand)) 0%,
-      hsl(245 75% 48%) 100%
+      hsl(var(--brand-2)) 100%
     );
   }
 
@@ -119,13 +152,139 @@
     color: hsl(var(--brand));
   }
 
-  /* The green success wash for fixtures that landed in the 2–4 band. */
+  .text-gradient {
+    background-image: linear-gradient(
+      120deg,
+      hsl(var(--brand)),
+      hsl(var(--brand-2))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Glows */
+  .glow-brand {
+    box-shadow: 0 0 0 1px hsl(var(--brand) / 0.25),
+      0 10px 40px -10px hsl(var(--brand) / 0.45);
+  }
+  .glow-success {
+    box-shadow: 0 0 0 1px hsl(var(--success) / 0.3),
+      0 10px 40px -12px hsl(var(--success) / 0.4);
+  }
+
+  /* Green wash for fixtures / results that landed in 2–4. */
   .result-2to4 {
     background-image: linear-gradient(
       90deg,
-      hsl(var(--success) / 0.14) 0%,
+      hsl(var(--success) / 0.16) 0%,
       hsl(var(--success) / 0.04) 100%
     );
     border-color: hsl(var(--success) / 0.5);
+  }
+
+  /* Animated aurora backdrop — fixed, sits behind everything. */
+  .aurora {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .aurora::before,
+  .aurora::after {
+    content: "";
+    position: absolute;
+    width: 55vw;
+    height: 55vw;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.35;
+    will-change: transform;
+  }
+  .aurora::before {
+    top: -15%;
+    left: -10%;
+    background: radial-gradient(circle, hsl(var(--brand) / 0.5), transparent 60%);
+    animation: aurora-drift-1 22s ease-in-out infinite alternate;
+  }
+  .aurora::after {
+    bottom: -20%;
+    right: -10%;
+    background: radial-gradient(circle, hsl(var(--success) / 0.4), transparent 60%);
+    animation: aurora-drift-2 26s ease-in-out infinite alternate;
+  }
+  .dark .aurora::before {
+    opacity: 0.4;
+  }
+  .dark .aurora::after {
+    opacity: 0.3;
+  }
+
+  /* Shimmer used on skeletons. */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--foreground) / 0.06),
+      transparent
+    );
+    animation: shimmer 1.6s infinite;
+  }
+}
+
+@layer utilities {
+  @keyframes aurora-drift-1 {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    100% {
+      transform: translate(12vw, 8vh) scale(1.15);
+    }
+  }
+  @keyframes aurora-drift-2 {
+    0% {
+      transform: translate(0, 0) scale(1.1);
+    }
+    100% {
+      transform: translate(-10vw, -6vh) scale(1);
+    }
+  }
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  .animate-pulse-glow {
+    animation: pulse-glow 2.4s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
   }
 }
