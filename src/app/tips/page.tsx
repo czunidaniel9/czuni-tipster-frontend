@@ -1,9 +1,12 @@
 "use client";
 
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Gauge,
   Search,
   Sparkles,
@@ -12,10 +15,10 @@ import {
 } from "lucide-react";
 import { TipCard } from "@/components/tip-card";
 import { EmptyState } from "@/components/empty-state";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getStatsSummary, getTipsForDate } from "@/lib/api";
 import { addDaysIso, dayDate, dayLabel, formatPct, todayIso } from "@/lib/format";
-import type { TipOut } from "@/lib/types";
 
 function StatCard({
   icon,
@@ -98,67 +101,69 @@ function DashboardHeader() {
   );
 }
 
-/** A day sub-header used inside both sections. */
-function DayHeading({ iso, count }: { iso: string; count: number }) {
-  return (
-    <div className="mb-3 mt-6 flex items-center gap-3 first:mt-0">
-      <h3 className="text-sm font-semibold tracking-tight">
-        {dayLabel(iso)}
-        <span className="ml-2 text-xs font-normal text-muted-foreground">
-          {dayDate(iso)}
-        </span>
-      </h3>
-      <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
-        {count}
-      </span>
-      <div className="h-px flex-1 bg-border" />
-    </div>
-  );
-}
-
-// Window of days shown on the dashboard: yesterday → +2 days. Tips are generated
-// for today + tomorrow, so those always appear; yesterday shows recent results.
-const WINDOW_OFFSETS = [-1, 0, 1, 2];
-
 export default function TipsPage() {
-  const today = todayIso();
-  const dates = WINDOW_OFFSETS.map((o) => addDaysIso(today, o));
+  const [date, setDate] = useState(todayIso());
 
-  const queries = useQueries({
-    queries: dates.map((d) => ({
-      queryKey: ["tips", d],
-      queryFn: () => getTipsForDate(d),
-    })),
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["tips", date],
+    queryFn: () => getTipsForDate(date),
   });
 
-  const isLoading = queries.some((q) => q.isLoading);
-  const error = queries.find((q) => q.error)?.error as Error | undefined;
-
-  const byDate: Record<string, TipOut[]> = {};
-  dates.forEach((d, i) => {
-    byDate[d] = queries[i]?.data?.tips ?? [];
-  });
-
-  const tomorrow = addDaysIso(today, 1);
-
-  // Recommended: always show today + tomorrow (even if empty), plus any other
-  // day in the window that has a recommended tip.
-  const recommendedDays = dates
-    .map((d) => ({ date: d, tips: (byDate[d] ?? []).filter((t) => t.publishable) }))
-    .filter(
-      ({ date, tips }) => tips.length > 0 || date === today || date === tomorrow
-    );
-
-  // Analysed: show any day that has analysed matches.
-  const analysedDays = dates
-    .map((d) => ({ date: d, tips: (byDate[d] ?? []).filter((t) => !t.publishable) }))
-    .filter(({ tips }) => tips.length > 0);
-
-  const anyData = dates.some((d) => (byDate[d] ?? []).length > 0);
+  const tips = data?.tips ?? [];
+  const recommended = tips.filter((t) => t.publishable);
+  const analysed = tips.filter((t) => !t.publishable);
 
   return (
     <div className="space-y-8">
       <DashboardHeader />
+
+      {/* Date navigation — pick any day to look back at what happened */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight">
+            {dayLabel(date)}
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
+              {dayDate(date)}
+            </span>
+          </h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Recommended tips and analysed matches for the selected day.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Previous day"
+            onClick={() => setDate((d) => addDaysIso(d, -1))}
+            className="inline-flex size-9 items-center justify-center rounded-lg border bg-card text-muted-foreground hover:text-foreground"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <Input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value || todayIso())}
+            className="w-40"
+          />
+          <button
+            type="button"
+            aria-label="Next day"
+            onClick={() => setDate((d) => addDaysIso(d, 1))}
+            className="inline-flex size-9 items-center justify-center rounded-lg border bg-card text-muted-foreground hover:text-foreground"
+          >
+            <ChevronRight className="size-4" />
+          </button>
+          {date !== todayIso() && (
+            <button
+              type="button"
+              onClick={() => setDate(todayIso())}
+              className="rounded-lg border bg-card px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
+            >
+              Today
+            </button>
+          )}
+        </div>
+      </div>
 
       <div className="space-y-10">
         {isLoading && (
@@ -172,77 +177,74 @@ export default function TipsPage() {
           <EmptyState
             icon={Target}
             title="Couldn't load tips"
-            description={error.message ?? "Unknown error contacting the backend."}
+            description={
+              error instanceof Error
+                ? error.message
+                : "Unknown error contacting the backend."
+            }
           />
         )}
 
-        {/* RECOMMENDED TIPS — grouped by day */}
+        {/* RECOMMENDED TIPS for the selected day */}
         {!isLoading && !error && (
           <section>
             <div className="mb-2 flex items-center gap-2">
               <Sparkles className="size-5 text-success" />
-              <h2 className="text-xl font-bold tracking-tight">Recommended Tips</h2>
+              <h3 className="text-lg font-bold tracking-tight">Recommended Tips</h3>
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
+                {recommended.length}
+              </span>
             </div>
             <p className="mb-4 text-sm text-muted-foreground">
               The engine&apos;s actual picks — up to 3 per day, the only ones
-              counted in the statistics. Some days have none if nothing clears the
-              bar.
+              counted in the statistics.
             </p>
 
-            {recommendedDays.map(({ date, tips }) => (
-              <div key={date}>
-                <DayHeading iso={date} count={tips.length} />
-                {tips.length > 0 ? (
-                  <div className="grid items-start gap-6 lg:grid-cols-2">
-                    {tips.map((tip) => (
-                      <TipCard key={tip.id} tip={tip} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="surface flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
-                    <CheckCircle2 className="size-4 shrink-0" />
-                    No recommended tip on this day — nothing cleared the
-                    confidence bar across all layers.
-                  </div>
-                )}
+            {recommended.length > 0 ? (
+              <div className="grid items-start gap-6 lg:grid-cols-2">
+                {recommended.map((tip) => (
+                  <TipCard key={tip.id} tip={tip} />
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="surface flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
+                <CheckCircle2 className="size-4 shrink-0" />
+                No recommended tip on this day — nothing cleared the confidence bar
+                across all layers.
+              </div>
+            )}
           </section>
         )}
 
-        {/* ANALYSED MATCHES — grouped by day */}
-        {!isLoading && !error && analysedDays.length > 0 && (
+        {/* ANALYSED MATCHES for the selected day */}
+        {!isLoading && !error && (
           <section>
             <div className="mb-2 flex items-center gap-2">
               <Search className="size-5 text-muted-foreground" />
-              <h2 className="text-xl font-bold tracking-tight text-muted-foreground">
+              <h3 className="text-lg font-bold tracking-tight text-muted-foreground">
                 Analysed Matches
-              </h2>
+              </h3>
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
+                {analysed.length}
+              </span>
             </div>
             <p className="mb-4 text-sm text-muted-foreground">
               Other matches the engine analysed but did not recommend. Shown for
               context — not counted in the statistics.
             </p>
 
-            {analysedDays.map(({ date, tips }) => (
-              <div key={date}>
-                <DayHeading iso={date} count={tips.length} />
-                <div className="grid items-start gap-6 lg:grid-cols-2">
-                  {tips.map((tip) => (
-                    <TipCard key={tip.id} tip={tip} />
-                  ))}
-                </div>
+            {analysed.length > 0 ? (
+              <div className="grid items-start gap-6 lg:grid-cols-2">
+                {analysed.map((tip) => (
+                  <TipCard key={tip.id} tip={tip} />
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="surface px-4 py-3 text-sm text-muted-foreground">
+                No analysed matches stored for this day.
+              </div>
+            )}
           </section>
-        )}
-
-        {!isLoading && !error && !anyData && (
-          <EmptyState
-            icon={Target}
-            title="No matches in this window"
-            description="No covered fixtures around today. New tips are generated each morning at 07:00 UTC."
-          />
         )}
       </div>
     </div>
