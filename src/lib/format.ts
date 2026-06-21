@@ -23,6 +23,27 @@ export function todayIso(): string {
   return format(new Date(), "yyyy-MM-dd");
 }
 
+/** Add `n` days to a yyyy-MM-dd string (UTC-safe), returning yyyy-MM-dd. */
+export function addDaysIso(iso: string, n: number): string {
+  const d = new Date(iso + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** "Today" / "Tomorrow" / "Yesterday", else "Sat 21 Jun". */
+export function dayLabel(iso: string): string {
+  const today = todayIso();
+  if (iso === today) return "Today";
+  if (iso === addDaysIso(today, 1)) return "Tomorrow";
+  if (iso === addDaysIso(today, -1)) return "Yesterday";
+  return format(parseISO(iso), "EEE d MMM");
+}
+
+/** Full date for the day sub-header, e.g. "Sat 21 Jun". */
+export function dayDate(iso: string): string {
+  return format(parseISO(iso), "EEE d MMM");
+}
+
 const MARKET_LABELS: Record<TipMarket, string> = {
   goals_2_to_4: "Total goals: 2–4",
   match_winner_90: "Match winner (90 min)",
