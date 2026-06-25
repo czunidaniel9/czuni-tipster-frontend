@@ -123,9 +123,9 @@ function DashboardHeader() {
         />
         <StatCard
           icon={<TrendingUp className="size-4" />}
-          label="Pending"
-          value={stats?.pending ?? 0}
-          sub="awaiting result"
+          label="Settled"
+          value={stats ? stats.won + stats.lost : 0}
+          sub="results in"
           ready={ready}
         />
       </Stagger>
